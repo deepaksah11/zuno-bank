@@ -5,6 +5,12 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/backend/Authentication/pom.xml" />
+        <option value="$USER_HOME$/Downloads/ServiceRegistry/ServiceRegistry/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/ServiceRegistry/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/AccountManagemnet/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/Transactions/pom.xml" />
+        <option value="$USER_HOME$/Downloads/ApiGateway/ApiGateway/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/ApiGateway/pom.xml" />
       </list>
     </option>
   </component>

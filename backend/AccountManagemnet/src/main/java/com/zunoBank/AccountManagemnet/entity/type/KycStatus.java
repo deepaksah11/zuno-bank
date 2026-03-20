@@ -1,4 +1,7 @@
 package com.zunoBank.AccountManagemnet.entity.type;
 
-public class KycStatus {
+public enum KycStatus {
+    PENDING,      // just registered
+    VERIFIED,     // KYC approved
+    REJECTED
 }

@@ -1,4 +1,8 @@
 package com.zunoBank.AccountManagemnet.entity.type;
 
-public class MaritalStatus {
+public enum MaritalStatus {
+    SINGLE,
+    MARRIED,
+    DIVORCED,
+    WIDOWED
 }

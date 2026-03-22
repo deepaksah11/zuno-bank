@@ -1,5 +1,7 @@
 package com.zunoBank.Authentication.security;
 
+import com.zunoBank.Authentication.entity.StaffUser;
+import com.zunoBank.Authentication.repository.StaffUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +20,7 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private final UserRepository userRepository;
+    private final StaffUserRepository staffUserRepository;
     private final AuthUtil authUtil;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
@@ -37,7 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String username = authUtil.getUsernameFromToken(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                User user = userRepository.findByUsername(username).orElseThrow();
+                StaffUser user = staffUserRepository.findByEmployeeId(username).orElseThrow();
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationFilter =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationFilter);

@@ -89,6 +89,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+<<<<<<< HEAD
+=======
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-openfeign-core</artifactId>
         </dependency>
@@ -99,14 +101,20 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+>>>>>>> 375380e1c529ad332a7846e40dff7677d3cec8de
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
         <dependency>
+<<<<<<< HEAD
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+=======
             <groupId>com.zunoBank</groupId>
             <artifactId>AccountManagemnet</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
+>>>>>>> 375380e1c529ad332a7846e40dff7677d3cec8de
         </dependency>
     </dependencies>
 

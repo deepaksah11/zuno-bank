@@ -15,6 +15,6 @@ public class CustomStaffDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return staffUserRepository.findByUsername(username).orElseThrow();
+        return staffUserRepository.findByEmployeeId(username).orElseThrow();
     }
 }

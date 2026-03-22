@@ -26,7 +26,7 @@ public class AuthService {
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmployeeId(), loginRequestDto.getPassword())
         );
         StaffUser staffUser = (StaffUser) authentication.getPrincipal();
         String token = authUtil.generateAccessToken(staffUser);

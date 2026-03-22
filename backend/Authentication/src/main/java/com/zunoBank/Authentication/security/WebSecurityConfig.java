@@ -17,8 +17,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import static com.zunoBank.Authentication.entity.type.StaffRole.ADMIN;
-import static com.zunoBank.Authentication.entity.type.StaffRole.SUPER_ADMIN;
+
+import static com.zunoBank.Authentication.entity.type.StaffRole.*;
 
 @Slf4j
 @Configuration
@@ -37,7 +37,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/public/**", "/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyRole(ADMIN.name(), SUPER_ADMIN.name())
                         .requestMatchers("/manager/**").hasAnyRole(StaffRole.BRANCH_MANAGER.name())
-                        .requestMatchers("/staff/**").hasAnyRole(StaffRole.RELATIONSHIP_OFFICER.name(), StaffRole.LOAN_OFFICER.name(), StaffRole.SUPPORT_AGENT.name())
+                        .requestMatchers("/staff/**").hasAnyRole(StaffRole.RELATIONSHIP_OFFICER.name(), StaffRole.LOAN_OFFICER.name(), StaffRole.SUPPORT_AGENT.name(), SUPER_ADMIN.name(), BRANCH_MANAGER.name())
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

@@ -52,12 +52,12 @@ public class SavingAccount {
     private String branchName;
 
     // ── RO ────────────────────────────────────────────────────────────────
-    private Long createdByRoId;
+    private String createdByRoId;
     private String roName;
     private LocalDateTime submittedAt;
 
     // ── Manager ───────────────────────────────────────────────────────────
-    private Long approvedByManagerId;
+    private String approvedByManagerId;
     private String approvedByManagerName;
     private LocalDateTime actionTakenAt;
     private String rejectionReason;

@@ -36,6 +36,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/public/**", "/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyRole(ADMIN.name(), SUPER_ADMIN.name())
+                        .requestMatchers("/internal/**").permitAll()
                         .requestMatchers("/manager/**").hasAnyRole(StaffRole.BRANCH_MANAGER.name())
                         .requestMatchers("/staff/**").hasAnyRole(StaffRole.RELATIONSHIP_OFFICER.name(), StaffRole.LOAN_OFFICER.name(), StaffRole.SUPPORT_AGENT.name(), SUPER_ADMIN.name(), BRANCH_MANAGER.name())
                         .anyRequest().permitAll()

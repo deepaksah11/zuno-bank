@@ -47,7 +47,7 @@ public class PendingOnboardingDTO {
     // ── Branch & RO ───────────────────────────────────────────────────────
     private String branchCode;
     private String branchName;
-    private Long createdByRoId;
+    private String createdByRoId;
     private String roName;
     private LocalDateTime submittedAt;
 }

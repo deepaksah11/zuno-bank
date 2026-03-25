@@ -266,32 +266,6 @@ public class ManageStaffImpl implements ManageStaff {
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // PRIVATE HELPERS
-    // ─────────────────────────────────────────────────────────────────────
-
-    /**
-     * Converts StaffUser entity to StaffResponseDto using ModelMapper.
-     *
-     * ModelMapper handles automatically:
-     *   id              → id
-     *   employeeId      → employeeId
-     *   fullName        → fullName
-     *   email           → email
-     *   role            → role
-     *   status          → status
-     *   branchCode      → branchCode
-     *   phoneNumber     → phoneNumber
-     *   department      → department
-     *   designation     → designation
-     *   createdAt       → createdAt
-     *   lastLoginAt     → lastLoginAt
-     *   passwordChangedAt → passwordChangedAt
-     *
-     * ModelMapper handles via custom typeMap in ModelMapperConfig:
-     *   createdBy.employeeId → createdByEmployeeId
-     *   passwordHash         → skipped (always null in response)
-     */
     private StaffResponseDto toResponse(StaffUser staff) {
         return modelMapper.map(staff, StaffResponseDto.class);
         // one line replaces the entire manual builder chain

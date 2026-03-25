@@ -79,12 +79,12 @@ public class Customer {
     // ── Branch & RO ───────────────────────────────────────────────────────
     private String branchCode;
     private String branchName;
-    private Long createdByRoId;
+    private String createdByRoId;
     private String roName;
     private LocalDateTime submittedAt;
 
     // ── Manager ───────────────────────────────────────────────────────────
-    private Long approvedByManagerId;
+    private String approvedByManagerId;
     private String approvedByManagerName;
     private LocalDateTime actionTakenAt;
     private String rejectionReason;

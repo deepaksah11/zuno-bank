@@ -1,12 +1,19 @@
 package com.zunoBank.AccountManagemnet.controller;
 
 
+import com.zunoBank.AccountManagemnet.client.AuthServiceClient;
 import com.zunoBank.AccountManagemnet.dto.*;
+import com.zunoBank.AccountManagemnet.service.AccountQueryService;
+import com.zunoBank.AccountManagemnet.service.ApprovalService;
 import com.zunoBank.AccountManagemnet.service.OnboardingService;
+import com.zunoBank.AccountManagemnet.service.PendingQueueService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,30 +24,39 @@ import java.util.List;
 public class OnboardingController {
 
     private final OnboardingService onboardingService;
+    private final ApprovalService approvalService;
+    private final AccountQueryService accountQueryService;
+    private final PendingQueueService pendingQueueService;
+    private final AuthServiceClient authServiceClient;
 
     // ── STEP 1: RO submits ONE form ───────────────────────────────────────
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER','RELATIONSHIP_OFFICER')")
     public ResponseEntity<OnboardingResponseDTO> create(
-            @Valid @RequestBody OnboardingRequestDTO request) {
+            @Valid @RequestBody OnboardingRequestDTO request, @AuthenticationPrincipal UserDetails currentUser) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(onboardingService.createApplication(request));
+                .body(onboardingService.createApplication(request, currentUser.getUsername()));
     }
 
     // ── STEP 2: Manager views pending queue ───────────────────────────────
     @GetMapping("/pending/{branchCode}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER')")
     public ResponseEntity<List<PendingOnboardingDTO>> getPending(
-            @PathVariable String branchCode) {
+            @PathVariable String branchCode, @AuthenticationPrincipal UserDetails currentUser) {
+
+        StaffResponseDto staff = authServiceClient
+                .getStaffByEmployeeId(currentUser.getUsername());
         return ResponseEntity.ok(
-                onboardingService.getPendingApplications(branchCode));
+                pendingQueueService.getPendingApplications(branchCode, staff));
     }
 
     // ── STEP 3: Manager approves or rejects ───────────────────────────────
     @PutMapping("/approve")
     public ResponseEntity<OnboardingResponseDTO> approve(
-            @Valid @RequestBody OnboardingApprovalDTO approval) {
+            @Valid @RequestBody OnboardingApprovalDTO approval, @AuthenticationPrincipal UserDetails currentUser) {
         return ResponseEntity.ok(
-                onboardingService.processApproval(approval));
+                approvalService.processApproval(approval, currentUser.getUsername()));
     }
 
     // ── Get customer by CIF ───────────────────────────────────────────────
@@ -48,7 +64,7 @@ public class OnboardingController {
     public ResponseEntity<OnboardingResponseDTO> getByCif(
             @PathVariable String cif) {
         return ResponseEntity.ok(
-                onboardingService.getByCif(cif));
+                accountQueryService.getByCif(cif));
     }
 
     // ── Get saving account details ────────────────────────────────────────
@@ -56,7 +72,7 @@ public class OnboardingController {
     public ResponseEntity<OnboardingResponseDTO> getSavingAccount(
             @PathVariable String accountNumber) {
         return ResponseEntity.ok(
-                onboardingService.getSavingAccount(accountNumber));
+                accountQueryService.getSavingAccount(accountNumber));
     }
 
     // ── Get current account details ───────────────────────────────────────
@@ -64,7 +80,7 @@ public class OnboardingController {
     public ResponseEntity<OnboardingResponseDTO> getCurrentAccount(
             @PathVariable String accountNumber) {
         return ResponseEntity.ok(
-                onboardingService.getCurrentAccount(accountNumber));
+                accountQueryService.getCurrentAccount(accountNumber));
     }
 
     // ── Get all accounts by CIF ───────────────────────────────────────────
@@ -72,6 +88,6 @@ public class OnboardingController {
     public ResponseEntity<CustomerAccountsDTO> getAllAccountsByCif(
             @PathVariable String cif) {
         return ResponseEntity.ok(
-                onboardingService.getAllAccountsByCif(cif));
+                accountQueryService.getAllAccountsByCif(cif));
     }
 }

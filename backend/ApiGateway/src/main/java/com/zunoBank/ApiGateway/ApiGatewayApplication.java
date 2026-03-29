@@ -1,4 +1,4 @@
-package com.zuno_bank.ApiGateway;
+package com.zunoBank.ApiGateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

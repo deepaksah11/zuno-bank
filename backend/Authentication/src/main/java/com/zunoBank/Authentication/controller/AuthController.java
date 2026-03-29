@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth/staff")
+@RequestMapping("/api/v1/auth/staff")
 @RequiredArgsConstructor
 public class AuthController {
 

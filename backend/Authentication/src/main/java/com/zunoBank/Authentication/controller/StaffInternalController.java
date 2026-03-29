@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/internal/staff")
+@RequestMapping("api/v1/internal/staff")
 @RequiredArgsConstructor
 public class StaffInternalController {
 

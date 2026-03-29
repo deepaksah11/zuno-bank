@@ -1,4 +1,4 @@
-package com.zuno_bank.ApiGateway;
+package com.zunoBank.ApiGateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

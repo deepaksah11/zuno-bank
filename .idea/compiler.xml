@@ -10,7 +10,7 @@
         <module name="ApiGateway" />
         <module name="ServiceRegistry" />
       </profile>
-      <profile name="Annotation profile for Authentication" enabled="true">
+      <profile name="Annotation profile for Transactions" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />

@@ -41,13 +41,13 @@ public class OnboardingResponseDTO {
     private String branchName;
 
     // Manager
-    private Long approvedByManagerId;
+    private String approvedByManagerId;
     private String approvedByManagerName;
     private String rejectionReason;
     private LocalDateTime actionTakenAt;
 
     // RO
-    private Long createdByRoId;
+    private String createdByRoId;
     private String roName;
     private LocalDateTime submittedAt;
 

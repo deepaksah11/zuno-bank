@@ -36,15 +36,15 @@ public class OnboardingRequestDTO {
     private BigDecimal annualIncome;
 
     // Account Details
-    @NotNull private AccountType accountType;   // SAVINGS or CURRENT
+    @NotNull private AccountType accountType;
     @NotNull private BigDecimal initialDeposit;
     private String ifscCode;
 
-    // Branch & RO
-    @NotNull private String branchCode;
+    // Branch
     private String branchName;
-    @NotNull private Long createdByRoId;
-    private String roName;
+
+    // REMOVED — branchCode, createdByRoId, roName
+    // these now come from JWT + auth-service Feign call
 
     private String existingCif;
 }

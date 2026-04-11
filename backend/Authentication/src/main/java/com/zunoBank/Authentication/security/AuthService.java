@@ -31,6 +31,6 @@ public class AuthService {
         StaffUser staffUser = (StaffUser) authentication.getPrincipal();
         String token = authUtil.generateAccessToken(staffUser);
 
-        return new LoginResponseDto(token, staffUser.getId());
+        return new LoginResponseDto(token, staffUser.getId(), staffUser.getFullName(), staffUser.getRole().name());
     }
 }

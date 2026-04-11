@@ -26,14 +26,17 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
 
+            // ✅ ALLOW PREFLIGHT (MOST IMPORTANT FIX)
+            if (exchange.getRequest().getMethod().name().equals("OPTIONS")) {
+                return chain.filter(exchange);
+            }
+
             String path = exchange.getRequest().getURI().getPath();
 
-            // ✅ Allow public routes
             if (path.contains("/api/v1/auth")) {
                 return chain.filter(exchange);
             }
 
-            // 🔐 Get Authorization header
             String authHeader = exchange.getRequest()
                     .getHeaders()
                     .getFirst(HttpHeaders.AUTHORIZATION);
@@ -55,7 +58,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                         .build()
                         .parseSignedClaims(token);
 
-                // ✅ Token valid → forward request
                 return chain.filter(exchange);
 
             } catch (Exception e) {

@@ -21,8 +21,6 @@ public class FeignConfig {
                         .getHeader("Authorization");
 
                 if (authHeader != null) {
-                    // forward the JWT from the incoming request
-                    // to the outgoing Feign call
                     requestTemplate.header("Authorization", authHeader);
                 }
             }

@@ -10,12 +10,12 @@ import java.math.BigDecimal;
         name = "AccountManagement",
         contextId = "accountFeignClient")
 public interface AccountFeignClient {
-    @PutMapping("/api/v1/accounts/debit")
+    @PutMapping("/api/accounts/debit")
     void debit(
             @RequestParam String accountNumber,
             @RequestParam BigDecimal amount);
 
-    @PutMapping("/api/v1/accounts/credit")
+    @PutMapping("/api/accounts/credit")
     void credit(
             @RequestParam String accountNumber,
             @RequestParam BigDecimal amount);

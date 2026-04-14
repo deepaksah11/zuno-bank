@@ -3,10 +3,7 @@ package com.zunoBank.AccountManagemnet.controller;
 
 import com.zunoBank.AccountManagemnet.client.AuthServiceClient;
 import com.zunoBank.AccountManagemnet.dto.*;
-import com.zunoBank.AccountManagemnet.service.AccountQueryService;
-import com.zunoBank.AccountManagemnet.service.ApprovalService;
-import com.zunoBank.AccountManagemnet.service.OnboardingService;
-import com.zunoBank.AccountManagemnet.service.PendingQueueService;
+import com.zunoBank.AccountManagemnet.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -28,6 +26,7 @@ public class OnboardingController {
     private final AccountQueryService accountQueryService;
     private final PendingQueueService pendingQueueService;
     private final AuthServiceClient authServiceClient;
+    private final AccountTransactionService accountTransactionService;
 
     // ── STEP 1: RO submits ONE form ───────────────────────────────────────
     @PostMapping("/create")
@@ -89,5 +88,23 @@ public class OnboardingController {
             @PathVariable String cif) {
         return ResponseEntity.ok(
                 accountQueryService.getAllAccountsByCif(cif));
+    }
+
+    // ── Internal: Debit ───────────────────────────────────────────────────
+    @PutMapping("/debit")
+    public ResponseEntity<Void> debit(
+            @RequestParam String accountNumber,
+            @RequestParam BigDecimal amount) {
+        accountTransactionService.debit(accountNumber, amount);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Internal: Credit ──────────────────────────────────────────────────
+    @PutMapping("/credit")
+    public ResponseEntity<Void> credit(
+            @RequestParam String accountNumber,
+            @RequestParam BigDecimal amount) {
+        accountTransactionService.credit(accountNumber, amount);
+        return ResponseEntity.noContent().build();
     }
 }

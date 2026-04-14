@@ -39,7 +39,7 @@ public class WebSecurityConfig {
                                 StaffRole.SUPER_ADMIN.name())
                         .requestMatchers("/manager/**").hasRole(
                                 StaffRole.BRANCH_MANAGER.name())
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter,
                         UsernamePasswordAuthenticationFilter.class)

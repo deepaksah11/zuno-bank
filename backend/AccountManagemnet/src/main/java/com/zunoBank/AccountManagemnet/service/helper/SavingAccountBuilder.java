@@ -5,6 +5,7 @@ import com.zunoBank.AccountManagemnet.dto.OnboardingResponseDTO;
 import com.zunoBank.AccountManagemnet.dto.StaffResponseDto;
 import com.zunoBank.AccountManagemnet.entity.Customer;
 import com.zunoBank.AccountManagemnet.entity.SavingAccount;
+import com.zunoBank.AccountManagemnet.entity.type.AccountStatus;
 import com.zunoBank.AccountManagemnet.entity.type.AccountType;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class SavingAccountBuilder {
         sa.setBranchName(r.getBranchName());
         sa.setCreatedByRoId(staff.getEmployeeId());  // ← was request.getCreatedByRoId()
         sa.setRoName(staff.getFullName());           // ← was request.getRoName()
+        sa.setStatus(AccountStatus.PENDING_APPROVAL);
         return sa;
     }
 

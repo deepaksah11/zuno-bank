@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface CustomerRepository
         extends JpaRepository<Customer, Long> {
 
-    Optional<Customer> findByCif(String cif);
+    Optional<Customer> findByCifAndBranchCode(String cif, String branchCode);
 
     List<Customer> findByStatusAndBranchCode(
             CustomerStatus status, String branchCode);
@@ -24,4 +24,7 @@ public interface CustomerRepository
     boolean existsByAadhaarNumber(String aadhaarNumber);
     boolean existsByPanNumber(String panNumber);
 
+    List<Customer> findByBranchCode(String branchCode);
+
+    Optional<Customer> findByCif(String existingCif);
 }

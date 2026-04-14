@@ -20,6 +20,7 @@ public class OnboardingResponseDTO {
     private String fullName;
     private String phone;
     private String email;
+    private String message;
 
     // Account
     private Long accountId;

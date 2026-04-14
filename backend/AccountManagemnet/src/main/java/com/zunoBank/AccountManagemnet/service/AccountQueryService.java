@@ -1,9 +1,6 @@
 package com.zunoBank.AccountManagemnet.service;
 
-import com.zunoBank.AccountManagemnet.dto.CurrentAccountDTO;
-import com.zunoBank.AccountManagemnet.dto.CustomerAccountsDTO;
-import com.zunoBank.AccountManagemnet.dto.OnboardingResponseDTO;
-import com.zunoBank.AccountManagemnet.dto.SavingAccountDTO;
+import com.zunoBank.AccountManagemnet.dto.*;
 import com.zunoBank.AccountManagemnet.entity.CurrentAccount;
 import com.zunoBank.AccountManagemnet.entity.Customer;
 import com.zunoBank.AccountManagemnet.entity.SavingAccount;
@@ -13,9 +10,12 @@ import com.zunoBank.AccountManagemnet.repository.CurrentAccountRepository;
 import com.zunoBank.AccountManagemnet.repository.CustomerRepository;
 import com.zunoBank.AccountManagemnet.repository.SavingAccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -24,11 +24,71 @@ public class AccountQueryService {
     private final CustomerRepository customerRepository;
     private final SavingAccountRepository savingAccountRepository;
     private final CurrentAccountRepository currentAccountRepository;
+    private final ModelMapper modelMapper;
 
-    public OnboardingResponseDTO getByCif(String cif) {
+    public List<CustomerDTO> getAllCustomersWithAccounts() {
+        List<Customer> customers = customerRepository.findAll();
+        return mapCustomersToDTO(customers);
+    }
+
+    public List<CustomerDTO> getCustomersByBranchWithAccounts(String branchCode) {
+        List<Customer> customers = customerRepository.findByBranchCode(branchCode);
+        return mapCustomersToDTO(customers);
+    }
+
+    private List<CustomerDTO> mapCustomersToDTO(List<Customer> customers) {
+        return customers.stream()
+                .map(customer -> {
+                    CustomerDTO dto = new CustomerDTO();
+
+                    // Map basic customer info
+                    dto.setCif(customer.getCif());
+                    dto.setFirstName(customer.getFirstName());
+                    dto.setLastName(customer.getLastName());
+                    dto.setPhone(customer.getPhone());
+                    dto.setBranchCode(customer.getBranchCode());
+                    dto.setEmail(customer.getEmail());
+
+                    // Check for saving account first
+                    Optional<SavingAccount> savingAccount =
+                            savingAccountRepository.findByCif(customer.getCif());
+
+                    if (savingAccount.isPresent()) {
+                        SavingAccount account = savingAccount.get();
+                        dto.setAccountType("SAVINGS");
+                        dto.setBalance(account.getBalance() != null
+                                ? account.getBalance().toString()
+                                : "0");
+                        dto.setStatus(account.getStatus().toString());
+                    } else {
+                        // Try current account
+                        Optional<CurrentAccount> currentAccount =
+                                currentAccountRepository.findByCif(customer.getCif());
+
+                        if (currentAccount.isPresent()) {
+                            CurrentAccount account = currentAccount.get();
+                            dto.setAccountType("CURRENT");
+                            dto.setBalance(account.getBalance() != null
+                                    ? account.getBalance().toString()
+                                    : "0");
+                            dto.setStatus(account.getStatus().toString());
+                        } else {
+                            // No account created yet (pending approval)
+                            dto.setAccountType("N/A");
+                            dto.setBalance("0");
+                            dto.setStatus(customer.getStatus().toString());
+                        }
+                    }
+
+                    return dto;
+                })
+                .toList();
+    }
+
+    public OnboardingResponseDTO getByCifAndBranch(String cif,  String branchCode) {
 
         Customer customer = customerRepository
-                .findByCif(cif)
+                .findByCifAndBranchCode(cif, branchCode)
                 .orElseThrow(() -> new AccountException(
                         "Customer not found with CIF: " + cif));
 
@@ -170,10 +230,10 @@ public class AccountQueryService {
                 .build();
     }
 
-    public CustomerAccountsDTO getAllAccountsByCif(String cif) {
+    public CustomerAccountsDTO getAllAccountsByCif(String cif, String branchCode) {
 
         Customer customer = customerRepository
-                .findByCif(cif)
+                .findByCifAndBranchCode(cif, branchCode)
                 .orElseThrow(() -> new AccountException(
                         "Customer not found with CIF: " + cif));
 
@@ -221,6 +281,80 @@ public class AccountQueryService {
                         .createdAt(c.getCreatedAt())
                         .lastTransactionAt(c.getLastTransactionAt())
                         .build()).orElse(null))
+                .build();
+    }
+
+    public List<Customer> getCustomersByBranch(String branchCode) {
+        return customerRepository.findByBranchCode(branchCode);
+    }
+
+    public List<Customer> getAllCustomers() {
+        return customerRepository.findAll();
+    }
+
+    public AccountsPageDTO getAllAccounts(String branchCode, String role) {
+        modelMapper.getConfiguration().setAmbiguityIgnored(true);
+
+        List<AccountListDTO> accounts = new ArrayList<>();
+
+        long savingCount = 0;
+        long currentCount = 0;
+
+        BigDecimal savingBalance = BigDecimal.ZERO;
+        BigDecimal currentBalance = BigDecimal.ZERO;
+
+        // ✅ Saving Accounts
+        List<SavingAccount> savingAccounts =
+                role.equals("SUPER_ADMIN")
+                        ? savingAccountRepository.findAll()
+                        : savingAccountRepository.findByBranchCode(branchCode);
+
+        for (SavingAccount sa : savingAccounts) {
+            AccountListDTO dto = modelMapper.map(sa, AccountListDTO.class);
+
+            dto.setCustomerName(sa.getCustomer().getFullName());
+            dto.setAccountType("SAVING");
+            dto.setCustomerName(sa.getCustomer().getFullName());
+            dto.setCif(sa.getCustomer().getCif());
+            dto.setStatus(sa.getStatus().name());
+
+            accounts.add(dto);
+
+            savingCount++;
+            savingBalance = savingBalance.add(
+                    sa.getBalance() != null ? sa.getBalance() : BigDecimal.ZERO
+            );
+        }
+
+        // ✅ Current Accounts
+        List<CurrentAccount> currentAccounts =
+                role.equals("SUPER_ADMIN")
+                        ? currentAccountRepository.findAll()
+                        : currentAccountRepository.findByBranchCode(branchCode);
+
+        for (CurrentAccount ca : currentAccounts) {
+            AccountListDTO dto = modelMapper.map(ca, AccountListDTO.class);
+
+            dto.setCustomerName(ca.getCustomer().getFullName());
+            dto.setAccountType("CURRENT");
+            dto.setCustomerName(ca.getCustomer().getFullName());
+            dto.setCif(ca.getCustomer().getCif());
+            dto.setStatus(ca.getStatus().name());
+
+            accounts.add(dto);
+
+            currentCount++;
+            currentBalance = currentBalance.add(
+                    ca.getBalance() != null ? ca.getBalance() : BigDecimal.ZERO
+            );
+        }
+
+        return AccountsPageDTO.builder()
+                .accounts(accounts)
+                .totalSavingAccounts(savingCount)
+                .totalSavingBalance(savingBalance)
+                .totalCurrentAccounts(currentCount)
+                .totalCurrentBalance(currentBalance)
                 .build();
     }
 }

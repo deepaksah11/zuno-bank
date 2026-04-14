@@ -3,9 +3,12 @@ package com.zunoBank.AccountManagemnet.controller;
 
 import com.zunoBank.AccountManagemnet.client.AuthServiceClient;
 import com.zunoBank.AccountManagemnet.dto.*;
+import com.zunoBank.AccountManagemnet.entity.Customer;
 import com.zunoBank.AccountManagemnet.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/onboarding")
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class OnboardingController {
     private final PendingQueueService pendingQueueService;
     private final AuthServiceClient authServiceClient;
     private final AccountTransactionService accountTransactionService;
+    private final ModelMapper modelMapper;
 
     // ── STEP 1: RO submits ONE form ───────────────────────────────────────
     @PostMapping("/create")
@@ -58,12 +63,35 @@ public class OnboardingController {
                 approvalService.processApproval(approval, currentUser.getUsername()));
     }
 
+    @GetMapping("/customers")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER','RELATIONSHIP_OFFICER')")
+    public ResponseEntity<List<CustomerDTO>> getCustomers(
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        StaffResponseDto user = authServiceClient
+                .getStaffByEmployeeId(currentUser.getUsername());
+        List<CustomerDTO> customers;
+
+        if (user.getRole().equals("SUPER_ADMIN")) {
+            customers = accountQueryService.getAllCustomersWithAccounts(); // ✅ Changed
+        } else {
+            customers = accountQueryService.getCustomersByBranchWithAccounts(user.getBranchCode()); // ✅ Changed
+        }
+        log.info(customers.toString());
+        return ResponseEntity.ok(customers);
+    }
+
     // ── Get customer by CIF ───────────────────────────────────────────────
     @GetMapping("/customer/{cif}")
     public ResponseEntity<OnboardingResponseDTO> getByCif(
-            @PathVariable String cif) {
+            @PathVariable String cif,
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        StaffResponseDto user = authServiceClient
+                .getStaffByEmployeeId(currentUser.getUsername());
+
         return ResponseEntity.ok(
-                accountQueryService.getByCif(cif));
+                accountQueryService.getByCifAndBranch(cif, user.getBranchCode()));
     }
 
     // ── Get saving account details ────────────────────────────────────────
@@ -82,12 +110,30 @@ public class OnboardingController {
                 accountQueryService.getCurrentAccount(accountNumber));
     }
 
+    @GetMapping("/accounts")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER','TELLER')")
+    public ResponseEntity<AccountsPageDTO> getAllAccounts(
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        StaffResponseDto user = authServiceClient
+                .getStaffByEmployeeId(currentUser.getUsername());
+
+        return ResponseEntity.ok(
+                accountQueryService.getAllAccounts(user.getBranchCode(), user.getRole())
+        );
+    }
+
     // ── Get all accounts by CIF ───────────────────────────────────────────
     @GetMapping("/accounts/{cif}")
     public ResponseEntity<CustomerAccountsDTO> getAllAccountsByCif(
-            @PathVariable String cif) {
+            @PathVariable String cif, @AuthenticationPrincipal UserDetails currentUser) {
+
+        StaffResponseDto user = authServiceClient
+                .getStaffByEmployeeId(currentUser.getUsername());
+        List<CustomerDTO> customers;
+
         return ResponseEntity.ok(
-                accountQueryService.getAllAccountsByCif(cif));
+                accountQueryService.getAllAccountsByCif(cif, user.getBranchCode()));
     }
 
     // ── Internal: Debit ───────────────────────────────────────────────────

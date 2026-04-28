@@ -67,6 +67,7 @@ public class ApprovalService {
             // ── generate CIF only if new customer ─────────────────────
             if (customer.getCif() == null) {
                 customer.generateCif();
+                customer.setStatus(CustomerStatus.ACTIVE);
             }
 
             customer.setApprovedByManagerId(manager.getEmployeeId());
@@ -83,6 +84,7 @@ public class ApprovalService {
                 sa.setApprovedByManagerName(manager.getFullName());
                 sa.setActionTakenAt(LocalDateTime.now());
                 sa.generateAccountNumber();
+                sa.setStatus(AccountStatus.ACTIVE);
                 savingAccountRepository.save(sa);
 
                 return responseBuilder.buildSavingResponse(customer, sa);
@@ -96,6 +98,7 @@ public class ApprovalService {
                 ca.setApprovedByManagerName(manager.getFullName());
                 ca.setActionTakenAt(LocalDateTime.now());
                 ca.generateAccountNumber();
+                ca.setStatus(AccountStatus.ACTIVE);
                 currentAccountRepository.save(ca);
 
                 return responseBuilder.buildCurrentResponse(customer, ca);

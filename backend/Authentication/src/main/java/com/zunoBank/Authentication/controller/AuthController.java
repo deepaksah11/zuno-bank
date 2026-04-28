@@ -65,7 +65,7 @@ public class AuthController {
 
     @GetMapping("/hash")
     public String hash() {
-        return passwordEncoder.encode("Admin@2026");
+        return passwordEncoder.encode("Pass@123");
     }
 
     @PatchMapping("/change-password")

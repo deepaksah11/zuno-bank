@@ -10,7 +10,27 @@
         <module name="ApiGateway" />
         <module name="ServiceRegistry" />
       </profile>
-      <profile name="Annotation profile for Authentication" enabled="true">
+      <profile name="Annotation profile for Dashboard" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+        </processorPath>
+        <module name="Dashboard" />
+      </profile>
+      <profile name="Annotation profile for AccountManagement" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
+        </processorPath>
+        <module name="AccountManagemnet" />
+      </profile>
+      <profile name="Annotation profile for Transactions" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -18,8 +38,16 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
         </processorPath>
         <module name="Transactions" />
-        <module name="AccountManagemnet" />
         <module name="Authentication" />
+      </profile>
+      <profile name="Annotation profile for Branches" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="Branches" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -31,6 +59,8 @@
       <module name="AccountManagemnet" options="-parameters" />
       <module name="ApiGateway" options="-parameters" />
       <module name="Authentication" options="-parameters" />
+      <module name="Branches" options="-parameters" />
+      <module name="Dashboard" options="-parameters" />
       <module name="Hospital-Management-System" options="-parameters" />
       <module name="ServiceRegistry" options="-parameters" />
       <module name="Transactions" options="-parameters" />

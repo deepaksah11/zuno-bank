@@ -1,11 +1,10 @@
 package com.zunoBank.Transactions.controller;
 
 
-import com.zunoBank.Transactions.dto.StandingInstructionRequestDTO;
-import com.zunoBank.Transactions.dto.TransactionResponseDTO;
-import com.zunoBank.Transactions.dto.TransferRequestDTO;
+import com.zunoBank.Transactions.dto.*;
 import com.zunoBank.Transactions.entity.StandingInstruction;
 import com.zunoBank.Transactions.entity.type.TransactionType;
+import com.zunoBank.Transactions.repository.TransactionRepository;
 import com.zunoBank.Transactions.service.StandingInstructionService;
 import com.zunoBank.Transactions.service.TransactionMapper;
 import com.zunoBank.Transactions.service.TransactionService;
@@ -17,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +28,12 @@ public class TransactionController {
 
     private final TransactionService transactionService;
     private final TransactionMapper transactionMapper;
+    private final TransactionRepository transactionRepository;
 
+    @GetMapping
+    public ResponseEntity<List<TransactionResponseDTO>> getAllTransactions() {
+        return ResponseEntity.ok(transactionService.getAllTransactions());
+    }
 
     // ── Transfer ──────────────────────────────────────────────────────────
     @PostMapping("/transfer")
@@ -35,6 +41,21 @@ public class TransactionController {
             @Valid @RequestBody TransferRequestDTO request) {
         return ResponseEntity.ok(
                 transactionService.transfer(request));
+    }
+
+    @PostMapping("/deposit")
+    public ResponseEntity<TransactionResponseDTO> deposit(
+            @Valid @RequestBody DepositRequestDTO request) {
+
+        return ResponseEntity.ok(transactionService.deposit(request));
+    }
+
+    // ✅ WITHDRAW
+    @PostMapping("/withdraw")
+    public ResponseEntity<TransactionResponseDTO> withdraw(
+            @Valid @RequestBody WithdrawRequestDTO request) {
+
+        return ResponseEntity.ok(transactionService.withdraw(request));
     }
 
     // ── Transaction History ───────────────────────────────────────────────
@@ -63,5 +84,30 @@ public class TransactionController {
                 transactionMapper.getMiniStatement(accountNumber));
     }
 
+    @GetMapping("/count/today")
+    public long countTodayTransactions() {
+        return transactionRepository.countByInitiatedAtBetween(
+                LocalDate.now().atStartOfDay(),
+                LocalDate.now().atTime(23, 59, 59)
+        );
+    }
+
+    @GetMapping("/sum/deposits")
+    public BigDecimal sumDeposits() {
+        return transactionRepository.sumByType(TransactionType.DEPOSIT);
+    }
+
+    @GetMapping("/sum/deposits/last-month")
+    public BigDecimal getLastMonthDeposits() {
+        return transactionService.getLastMonthDeposits();
+    }
+
+    @GetMapping("/count/yesterday")
+    public long getYesterdayTransactions() {
+        return transactionRepository.countByInitiatedAtBetween(
+                LocalDate.now().minusDays(1).atStartOfDay(),
+                LocalDate.now().minusDays(1).atTime(23, 59, 59)
+        );
+    }
 }
 

@@ -30,7 +30,7 @@ public class AuthUtil {
                 .claim("branchCode", staffUser.getBranchCode())
                 .claim("userId", staffUser.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000*60*10))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
                 .signWith(getSecretKey())
                 .compact();
     }

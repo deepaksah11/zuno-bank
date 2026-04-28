@@ -31,4 +31,7 @@ public interface SavingAccountRepository
             AccountStatus status, String branchCode);
 
     boolean existsByCustomer(Customer customer);
+
+    List<SavingAccount> findByBranchCode(String branchCode);
+    Optional<SavingAccount> findByCustomer(Customer customer);
 }

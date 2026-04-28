@@ -32,13 +32,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             log.info("Incoming Request: {}", request.getRequestURI());
 
-            final String header = request.getHeader("Authorization");
-            if (header == null || !header.startsWith("Bearer ")) {
+            String token = null;
+
+            // 🔥 1. Check cookie
+            if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("token".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            // 🔁 2. Fallback to Authorization header
+            if (token == null) {
+                final String header = request.getHeader("Authorization");
+
+                if (header != null && header.startsWith("Bearer ")) {
+                    token = header.substring(7);
+                }
+            }
+
+            // ❌ No token → skip auth
+            if (token == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
-            String token = header.split("Bearer ")[1];
 
             // extract employeeId and role directly from JWT
             // no DB call needed — token already verified by auth-service

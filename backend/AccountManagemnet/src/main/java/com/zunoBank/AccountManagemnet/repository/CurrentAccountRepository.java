@@ -31,4 +31,8 @@ public interface CurrentAccountRepository
             AccountStatus status, String branchCode);
 
     boolean existsByCustomer(Customer customer);
+
+    List<CurrentAccount> findByBranchCode(String branchCode);
+
+    Optional<CurrentAccount> findByCustomer(Customer customer);
 }

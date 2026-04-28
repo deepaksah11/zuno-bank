@@ -11,6 +11,10 @@
         <option value="$PROJECT_DIR$/backend/Transactions/pom.xml" />
         <option value="$USER_HOME$/Downloads/ApiGateway/ApiGateway/pom.xml" />
         <option value="$PROJECT_DIR$/backend/ApiGateway/pom.xml" />
+        <option value="$USER_HOME$/Downloads/Dashboard/Dashboard/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/Dashboard/pom.xml" />
+        <option value="$USER_HOME$/Downloads/Branches/Branches/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/Branches/pom.xml" />
       </list>
     </option>
   </component>

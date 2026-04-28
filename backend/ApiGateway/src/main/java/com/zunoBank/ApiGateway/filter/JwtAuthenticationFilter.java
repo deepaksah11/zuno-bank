@@ -37,17 +37,34 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 return chain.filter(exchange);
             }
 
-            String authHeader = exchange.getRequest()
-                    .getHeaders()
-                    .getFirst(HttpHeaders.AUTHORIZATION);
+            String token = null;
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // 🔥 1. Try cookie first
+            if (exchange.getRequest().getCookies().getFirst("token") != null) {
+                token = exchange.getRequest()
+                        .getCookies()
+                        .getFirst("token")
+                        .getValue();
+            }
+
+            // 🔁 2. Fallback to Authorization header (optional)
+            if (token == null) {
+                String authHeader = exchange.getRequest()
+                        .getHeaders()
+                        .getFirst(HttpHeaders.AUTHORIZATION);
+
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    token = authHeader.substring(7);
+                }
+            }
+
+            // ❌ If still null → unauthorized
+            if (token == null) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
-
             try {
-                String token = authHeader.substring(7);
+//                String token = authHeader.substring(7);
 
                 SecretKey key = Keys.hmacShaKeyFor(
                         secretKey.getBytes(StandardCharsets.UTF_8)

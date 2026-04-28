@@ -11,9 +11,14 @@ import com.zunoBank.AccountManagemnet.repository.CustomerRepository;
 import com.zunoBank.AccountManagemnet.repository.SavingAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,14 +31,60 @@ public class AccountQueryService {
     private final CurrentAccountRepository currentAccountRepository;
     private final ModelMapper modelMapper;
 
-    public List<CustomerDTO> getAllCustomersWithAccounts() {
-        List<Customer> customers = customerRepository.findAll();
-        return mapCustomersToDTO(customers);
+    public Page<CustomerDTO> getAllCustomersWithAccounts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customers = customerRepository.findAll(pageable);
+
+        return customers.map(this::mapSingleCustomerToDTO);
     }
 
-    public List<CustomerDTO> getCustomersByBranchWithAccounts(String branchCode) {
-        List<Customer> customers = customerRepository.findByBranchCode(branchCode);
-        return mapCustomersToDTO(customers);
+    public Page<CustomerDTO> getCustomersByBranchWithAccounts(String branchCode, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customers = customerRepository.findByBranchCode(branchCode, pageable);
+
+        return customers.map(this::mapSingleCustomerToDTO);
+    }
+
+    private CustomerDTO mapSingleCustomerToDTO(Customer customer) {
+        CustomerDTO dto = new CustomerDTO();
+
+        dto.setCustomerId(customer.getId());
+        dto.setCif(customer.getCif());
+        dto.setFirstName(customer.getFirstName());
+        dto.setLastName(customer.getLastName());
+        dto.setPhone(customer.getPhone());
+        dto.setBranchCode(customer.getBranchCode());
+        dto.setEmail(customer.getEmail());
+
+        Optional<SavingAccount> savingAccount =
+                savingAccountRepository.findByCustomer(customer);
+
+        if (savingAccount.isPresent()) {
+            SavingAccount account = savingAccount.get();
+            dto.setAccountType("SAVINGS");
+            dto.setBalance(account.getBalance() != null
+                    ? account.getBalance().toString()
+                    : "0");
+            dto.setStatus(account.getStatus().toString());
+        } else {
+            Optional<CurrentAccount> currentAccount =
+                    currentAccountRepository.findByCustomer(customer);
+
+            if (currentAccount.isPresent()) {
+                CurrentAccount account = currentAccount.get();
+                dto.setAccountType("CURRENT");
+                dto.setBalance(account.getBalance() != null
+                        ? account.getBalance().toString()
+                        : "0");
+                dto.setStatus(account.getStatus().toString());
+            } else {
+                dto.setAccountType("N/A");
+                dto.setBalance("0");
+                dto.setStatus(customer.getStatus().toString());
+            }
+        }
+
+        return dto;
     }
 
     private List<CustomerDTO> mapCustomersToDTO(List<Customer> customers) {
@@ -41,7 +92,8 @@ public class AccountQueryService {
                 .map(customer -> {
                     CustomerDTO dto = new CustomerDTO();
 
-                    // Map basic customer info
+                    // Map basic customer
+                    dto.setCustomerId(customer.getId());
                     dto.setCif(customer.getCif());
                     dto.setFirstName(customer.getFirstName());
                     dto.setLastName(customer.getLastName());
@@ -51,7 +103,7 @@ public class AccountQueryService {
 
                     // Check for saving account first
                     Optional<SavingAccount> savingAccount =
-                            savingAccountRepository.findByCif(customer.getCif());
+                            savingAccountRepository.findByCustomer(customer);
 
                     if (savingAccount.isPresent()) {
                         SavingAccount account = savingAccount.get();
@@ -63,7 +115,7 @@ public class AccountQueryService {
                     } else {
                         // Try current account
                         Optional<CurrentAccount> currentAccount =
-                                currentAccountRepository.findByCif(customer.getCif());
+                                currentAccountRepository.findByCustomer(customer);
 
                         if (currentAccount.isPresent()) {
                             CurrentAccount account = currentAccount.get();
@@ -93,18 +145,26 @@ public class AccountQueryService {
                         "Customer not found with CIF: " + cif));
 
         Optional<SavingAccount> sa =
-                savingAccountRepository.findByCif(cif);
+                savingAccountRepository.findByCustomer(customer);
 
         Optional<CurrentAccount> ca =
-                currentAccountRepository.findByCif(cif);
+                currentAccountRepository.findByCustomer(customer);
 
         return OnboardingResponseDTO.builder()
                 .customerId(customer.getId())
                 .cif(customer.getCif())
                 .status(customer.getStatus())
                 .fullName(customer.getFullName())
+                .firstName(customer.getFirstName())
+                .lastName(customer.getLastName())
                 .phone(customer.getPhone())
                 .email(customer.getEmail())
+                .gender(customer.getGender())
+                .dateOfBirth(customer.getDateOfBirth())
+                .addressLine1(customer.getAddressLine1())
+                .pincode(customer.getPincode())
+                .aadhaarNumber(customer.getAadhaarNumber())
+                .panNumber(customer.getPanNumber())
                 .city(customer.getCity())
                 .state(customer.getState())
                 .accountId(sa.map(SavingAccount::getId).orElse(
@@ -356,5 +416,22 @@ public class AccountQueryService {
                 .totalCurrentAccounts(currentCount)
                 .totalCurrentBalance(currentBalance)
                 .build();
+    }
+
+    public long getLastMonthCustomers() {
+
+        LocalDate now = LocalDate.now();
+
+        LocalDateTime start = now.minusMonths(1)
+                .withDayOfMonth(1)
+                .atStartOfDay();
+
+        LocalDateTime end = now.minusMonths(1)
+                .withDayOfMonth(
+                        now.minusMonths(1).lengthOfMonth()
+                )
+                .atTime(23, 59, 59);
+
+        return customerRepository.countByCreatedAtBetween(start, end);
     }
 }

@@ -4,5 +4,6 @@ public enum CustomerStatus {
     PENDING_APPROVAL,   // RO submitted, waiting for manager
     ACTIVE,             // Manager approved, CIF generated
     REJECTED,           // Manager rejected
-    INACTIVE
+    INACTIVE,
+    CLOSED
 }

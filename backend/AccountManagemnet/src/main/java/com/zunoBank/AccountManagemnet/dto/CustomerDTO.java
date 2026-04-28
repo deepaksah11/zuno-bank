@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class CustomerDTO {
+    private Long customerId;
     private String cif;
     private String firstName;
     private String lastName;

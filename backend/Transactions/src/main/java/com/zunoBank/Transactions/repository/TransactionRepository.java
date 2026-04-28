@@ -34,4 +34,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             String accountNumber, Pageable pageable);
     List<Transaction> findTop5BySenderAccountNumberOrderByInitiatedAtDesc(
             String accountNumber);
+
+    long countByInitiatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = :type")
+    BigDecimal sumByType(@Param("type") TransactionType type);
+
+    @Query("""
+    SELECT COALESCE(SUM(t.amount), 0)
+    FROM Transaction t
+    WHERE t.type = 'DEPOSIT'
+    AND t.completedAt BETWEEN :start AND :end
+""")
+    BigDecimal sumDepositsBetween(LocalDateTime start, LocalDateTime end);
 }

@@ -57,7 +57,9 @@ public class Transaction {
                 .replace("-", "")
                 .substring(0, 10)
                 .toUpperCase();
-        this.status = TransactionStatus.PENDING;
+        if (this.status == null) {
+            this.status = TransactionStatus.PENDING;
+        }
     }
 
 }

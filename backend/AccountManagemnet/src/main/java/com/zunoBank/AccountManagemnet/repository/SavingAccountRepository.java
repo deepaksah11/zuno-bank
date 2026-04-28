@@ -33,4 +33,5 @@ public interface SavingAccountRepository
     boolean existsByCustomer(Customer customer);
 
     List<SavingAccount> findByBranchCode(String branchCode);
+    Optional<SavingAccount> findByCustomer(Customer customer);
 }

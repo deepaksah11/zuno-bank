@@ -5,6 +5,8 @@
     <file url="file://$PROJECT_DIR$/backend/AccountManagemnet/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/backend/ApiGateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/backend/Authentication/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/Branches/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/Dashboard/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/backend/ServiceRegistry/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/backend/Transactions/src/main/java" charset="UTF-8" />
   </component>

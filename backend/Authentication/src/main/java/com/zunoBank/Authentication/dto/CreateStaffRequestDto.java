@@ -23,7 +23,7 @@ public class CreateStaffRequestDto {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone must be 10 digits")
     private String phoneNumber;
 
-    private String department;
+    private String department; 
 
     private String designation;
 

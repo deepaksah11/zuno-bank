@@ -3,12 +3,13 @@ package com.zunoBank.AccountManagemnet.controller;
 
 import com.zunoBank.AccountManagemnet.client.AuthServiceClient;
 import com.zunoBank.AccountManagemnet.dto.*;
-import com.zunoBank.AccountManagemnet.entity.Customer;
+import com.zunoBank.AccountManagemnet.repository.CustomerRepository;
 import com.zunoBank.AccountManagemnet.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +32,7 @@ public class OnboardingController {
     private final PendingQueueService pendingQueueService;
     private final AuthServiceClient authServiceClient;
     private final AccountTransactionService accountTransactionService;
+    private final CustomerRepository customerRepository;
     private final ModelMapper modelMapper;
 
     // ── STEP 1: RO submits ONE form ───────────────────────────────────────
@@ -44,15 +46,14 @@ public class OnboardingController {
     }
 
     // ── STEP 2: Manager views pending queue ───────────────────────────────
-    @GetMapping("/pending/{branchCode}")
+    @GetMapping("/pending")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER')")
-    public ResponseEntity<List<PendingOnboardingDTO>> getPending(
-            @PathVariable String branchCode, @AuthenticationPrincipal UserDetails currentUser) {
+    public ResponseEntity<List<PendingOnboardingDTO>> getPending( @AuthenticationPrincipal UserDetails currentUser) {
 
         StaffResponseDto staff = authServiceClient
                 .getStaffByEmployeeId(currentUser.getUsername());
         return ResponseEntity.ok(
-                pendingQueueService.getPendingApplications(branchCode, staff));
+                pendingQueueService.getPendingApplications(staff.getBranchCode(), staff));
     }
 
     // ── STEP 3: Manager approves or rejects ───────────────────────────────
@@ -65,17 +66,20 @@ public class OnboardingController {
 
     @GetMapping("/customers")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER','RELATIONSHIP_OFFICER')")
-    public ResponseEntity<List<CustomerDTO>> getCustomers(
-            @AuthenticationPrincipal UserDetails currentUser) {
+    public ResponseEntity<Page<CustomerDTO>> getCustomers(
+            @AuthenticationPrincipal UserDetails currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
 
         StaffResponseDto user = authServiceClient
                 .getStaffByEmployeeId(currentUser.getUsername());
-        List<CustomerDTO> customers;
+        Page<CustomerDTO> customers;
 
         if (user.getRole().equals("SUPER_ADMIN")) {
-            customers = accountQueryService.getAllCustomersWithAccounts(); // ✅ Changed
+            customers = accountQueryService.getAllCustomersWithAccounts(page, size); // ✅ Changed
         } else {
-            customers = accountQueryService.getCustomersByBranchWithAccounts(user.getBranchCode()); // ✅ Changed
+            customers = accountQueryService.getCustomersByBranchWithAccounts(user.getBranchCode(), page, size); // ✅ Changed
         }
         log.info(customers.toString());
         return ResponseEntity.ok(customers);
@@ -152,5 +156,41 @@ public class OnboardingController {
             @RequestParam BigDecimal amount) {
         accountTransactionService.credit(accountNumber, amount);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/customers/count")
+    public long countCustomers() {
+        return customerRepository.count();
+    }
+
+    @GetMapping("/customers/last-month/count")
+    public long getLastMonthCustomers() {
+        return accountQueryService.getLastMonthCustomers();
+    }
+
+    @PutMapping("/update")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','BRANCH_MANAGER','RELATIONSHIP_OFFICER')")
+    public ResponseEntity<OnboardingResponseDTO> update(
+            @RequestBody OnboardingRequestDTO updateRequest,
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        return ResponseEntity.ok(
+                onboardingService.updateCustomer(updateRequest, currentUser.getUsername())
+        );
+    }
+
+    @PutMapping("/close/{cif}")
+    public ResponseEntity<String> closeCustomer(
+            @PathVariable String cif,
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        onboardingService.closeCustomer(cif, currentUser.getUsername());
+        return ResponseEntity.ok("Customer closed successfully");
+    }
+
+    @PutMapping("/close-by-id/{id}")
+    public ResponseEntity<String> closeCustomerById(@PathVariable Long id) {
+        onboardingService.closeCustomerById(id);
+        return ResponseEntity.ok("Customer closed successfully");
     }
 }

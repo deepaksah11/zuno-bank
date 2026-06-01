@@ -137,6 +137,65 @@ public class AccountQueryService {
                 .toList();
     }
 
+    private OnboardingResponseDTO buildResponse(
+            Customer customer,
+            Optional<SavingAccount> sa,
+            Optional<CurrentAccount> ca) {
+
+        return OnboardingResponseDTO.builder()
+                .customerId(customer.getId())
+                .cif(customer.getCif())
+                .status(customer.getStatus())
+                .fullName(customer.getFullName())
+                .firstName(customer.getFirstName())
+                .lastName(customer.getLastName())
+                .phone(customer.getPhone())
+                .email(customer.getEmail())
+                .gender(customer.getGender())
+                .dateOfBirth(customer.getDateOfBirth())
+                .addressLine1(customer.getAddressLine1())
+                .pincode(customer.getPincode())
+                .aadhaarNumber(customer.getAadhaarNumber())
+                .panNumber(customer.getPanNumber())
+                .city(customer.getCity())
+                .state(customer.getState())
+
+                // account mapping
+                .accountId(sa.map(SavingAccount::getId)
+                        .orElse(ca.map(CurrentAccount::getId).orElse(null)))
+
+                .accountNumber(sa.map(SavingAccount::getAccountNumber)
+                        .orElse(ca.map(CurrentAccount::getAccountNumber).orElse(null)))
+
+                .accountType(sa.isPresent()
+                        ? AccountType.SAVINGS
+                        : ca.isPresent() ? AccountType.CURRENT : null)
+
+                .balance(sa.map(SavingAccount::getBalance)
+                        .orElse(ca.map(CurrentAccount::getBalance).orElse(null)))
+
+                .branchCode(customer.getBranchCode())
+                .branchName(customer.getBranchName())
+
+                .build();
+    }
+
+    public OnboardingResponseDTO getByCif(String cif) {
+
+        Customer customer = customerRepository
+                .findByCif(cif)
+                .orElseThrow(() -> new AccountException(
+                        "Customer not found with CIF: " + cif));
+
+        Optional<SavingAccount> sa =
+                savingAccountRepository.findByCustomer(customer);
+
+        Optional<CurrentAccount> ca =
+                currentAccountRepository.findByCustomer(customer);
+
+        return buildResponse(customer, sa, ca);
+    }
+
     public OnboardingResponseDTO getByCifAndBranch(String cif,  String branchCode) {
 
         Customer customer = customerRepository

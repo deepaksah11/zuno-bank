@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -93,6 +94,12 @@ public class OnboardingController {
 
         StaffResponseDto user = authServiceClient
                 .getStaffByEmployeeId(currentUser.getUsername());
+
+        if (Set.of("SUPER_ADMIN", "ADMIN").contains(user.getRole())) {
+            return ResponseEntity.ok(
+                    accountQueryService.getByCif(cif)
+            );
+        }
 
         return ResponseEntity.ok(
                 accountQueryService.getByCifAndBranch(cif, user.getBranchCode()));
